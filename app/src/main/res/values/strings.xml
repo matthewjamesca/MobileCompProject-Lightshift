@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">MCProjectLightShift</string>
+    <string name="playbtn_name">New Game</string>
 </resources>
