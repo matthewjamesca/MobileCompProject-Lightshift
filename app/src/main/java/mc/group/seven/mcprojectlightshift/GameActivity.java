@@ -4,6 +4,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.GridView;
 
+//testing
 public class GameActivity extends AppCompatActivity {
 
     public GridView gv;
