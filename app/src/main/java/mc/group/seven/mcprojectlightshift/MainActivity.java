@@ -16,7 +16,11 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Listener, called my play game button. Opens Game Activity.
      * @param view
+     *
+     * this is the test commit
      */
+
+
     public void openGame(View view) {
         Intent intent = new Intent(MainActivity.this, GameActivity.class);
         startActivity(intent);
