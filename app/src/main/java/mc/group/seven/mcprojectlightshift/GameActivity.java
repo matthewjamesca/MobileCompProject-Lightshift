@@ -10,8 +10,6 @@ import android.widget.Toast;
 
 public class GameActivity extends AppCompatActivity {
 
-    //test commit and push
-
     public GridView gv;
     public String[] gameBoard = new String[84];
     public String[] gameKey = new String[84];
