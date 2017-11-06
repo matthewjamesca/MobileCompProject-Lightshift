@@ -1,6 +1,7 @@
 package mc.group.seven.mcprojectlightshift;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,6 +15,9 @@ public class LoadGameState extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_loadgameinfo);
+
+        Intent intent = new Intent(this, SaveActivity.class);
+        startActivity(intent);
 
         t1 = (TextView) findViewById(R.id.loadname);
         t2 = (TextView) findViewById(R.id.loadscore);
