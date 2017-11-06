@@ -8,16 +8,14 @@ import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button b,b1;
+    Button loadButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        b = (Button)findViewById(R.id.loadbutton);
-        b1 = (Button)findViewById(R.id.toSave);
-
+        loadButton = (Button)findViewById(R.id.loadbutton);
     }
 
     public void openGame(View view) {
@@ -27,11 +25,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void loadGameState(View v){
         Intent intent = new Intent(this, LoadGameState.class);
-        startActivity(intent);
-    }
-
-    public void toSave(View v){
-        Intent intent = new Intent(this, SaveActivity.class);
         startActivity(intent);
     }
 }
