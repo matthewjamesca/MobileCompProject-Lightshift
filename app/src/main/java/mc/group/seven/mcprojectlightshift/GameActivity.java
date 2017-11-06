@@ -16,7 +16,7 @@ public class GameActivity extends AppCompatActivity {
 
     public GridView gv;
     Button b;
-    TextView tv, name, score, level;
+
     public String[] items = new String[]
             {"1","2","3","4","5","6","7","8","9","1","2","3","4","5","6","7","8","9","1","2","3","4","5","6","7","8","9","1","2","3","4","5","6","7","8","9","1","2","3","4","5","6","7","8","9","1","2","3","4","5","6","7","8","9","1","2","3","4","5","6","7","8","9","1","2","3","4","5","6","7","8","9","1","2","3","4","5","6","7","8","9"};
 
@@ -30,30 +30,13 @@ public class GameActivity extends AppCompatActivity {
         CustomGridAdapter gridAdapter = new CustomGridAdapter(GameActivity.this, items);
         gv.setAdapter(gridAdapter);
     }
-
+/*
     public void changeColor(View v){
 
        tv= (TextView) v.findViewById(R.id.tv);
       tv.setText("  ");
       tv.setBackgroundColor(Color.RED);
     }
+*/
 
-    public void saveGameState(View v){
-
-        name = (TextView)findViewById(R.id.username);
-        score = (TextView) findViewById(R.id.score);
-        level = (TextView) findViewById(R.id.level);
-
-        SharedPreferences saveGame = getSharedPreferences("SAVEGAME", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = saveGame.edit();
-        editor.putString("username", name.getText().toString());
-        editor.putString("score", score.getText().toString());
-        editor.putString("level", level.getText().toString());
-        editor.apply();
-
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
-
-        //editor.put
-    }
 }

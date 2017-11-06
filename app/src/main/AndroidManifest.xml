@@ -17,7 +17,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".GameActivity" />
-        <activity android:name=".Loadgameinfo"></activity>
+        <activity android:name=".Loadgameinfo" />
+        <activity android:name=".SaveActivity"></activity>
     </application>
 
 </manifest>
