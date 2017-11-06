@@ -30,9 +30,6 @@ public class SaveActivity extends AppCompatActivity {
         editor.putString("level", level.getText().toString());
         editor.apply();
 
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
-
-        //editor.put
+        finish();
     }
 }

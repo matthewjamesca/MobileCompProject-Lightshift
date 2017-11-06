@@ -1,8 +1,6 @@
 package mc.group.seven.mcprojectlightshift;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -22,27 +20,17 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    /**
-     * Listener, called my play game button. Opens Game Activity.
-     * @param view
-     *
-     * this is the test commit
-     */
-
-
     public void openGame(View view) {
         Intent intent = new Intent(this, GameActivity.class);
         startActivity(intent);
     }
 
     public void loadGameState(View v){
-
-        Intent intent = new Intent(this, Loadgameinfo.class);
+        Intent intent = new Intent(this, LoadGameState.class);
         startActivity(intent);
     }
 
     public void toSave(View v){
-
         Intent intent = new Intent(this, SaveActivity.class);
         startActivity(intent);
     }
