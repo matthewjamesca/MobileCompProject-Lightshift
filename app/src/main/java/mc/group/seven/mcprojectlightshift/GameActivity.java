@@ -4,6 +4,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.GridView;
 
+//testing it
 public class GameActivity extends AppCompatActivity {
 
     //test commit and push
