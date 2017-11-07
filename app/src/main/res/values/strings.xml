@@ -1,10 +1,4 @@
 <resources>
     <string name="app_name">MCProjectLightShift</string>
     <string name="playbtn_name">New Game</string>
-    <string name="resetbtn_name">Reset</string>
-    <string name="movesnum">Moves: 0</string>
-    <string name="feedbackfield">Tutorial/Feedback goes here, user hits button to confirm.
-    Right now this button does nothing.</string>
-    <string name="fbbtn">OK</string>
-    <string name="levelhdr">Level 1: Starting Out</string>
 </resources>

@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 
@@ -18,7 +17,6 @@ public class CustomGridAdapter extends BaseAdapter {
     private Context context;
     private String[] items;
     LayoutInflater inflater;
-    LinearLayout l;
 
     public CustomGridAdapter(Context context, String[] items){
         this.context = context;
@@ -45,8 +43,7 @@ public class CustomGridAdapter extends BaseAdapter {
         if (view == null) {
             view = inflater.inflate(R.layout.cell,null);
         }
-       // l = (LinearLayout) view.findViewById(R.id.basecell);
-       TextView tv = (TextView) view.findViewById(R.id.tv);
+        TextView tv = (TextView) view.findViewById(R.id.tv);
         tv.setText(items[i]);
         return view;
     }

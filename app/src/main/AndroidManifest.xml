@@ -16,9 +16,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".GameActivity" />
-        <activity android:name=".LoadGameState" />
-        <activity android:name=".SaveActivity"></activity>
+        <activity android:name=".GameActivity"></activity>
     </application>
 
 </manifest>
