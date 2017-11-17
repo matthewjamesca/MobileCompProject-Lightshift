@@ -7,15 +7,10 @@ import android.view.View;
 import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity {
-
-    Button loadButton;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        loadButton = (Button)findViewById(R.id.loadbutton);
     }
 
     public void openGame(View view) {
@@ -23,8 +18,18 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void loadGameState(View v){
-        Intent intent = new Intent(this, LoadGameState.class);
+    public void openDownloadableLevels(View view) {
+        Intent intent = new Intent(this, DownloadLevelsActivity.class);
+        startActivity(intent);
+    }
+
+    public void openLevelSelect(View view) {
+        Intent intent = new Intent(this, LevelSelectActivity.class);
+        startActivity(intent);
+    }
+
+    public void openContactUs(View view) {
+        Intent intent = new Intent(this, ContactUsActivity.class);
         startActivity(intent);
     }
 }

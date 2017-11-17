@@ -18,7 +18,10 @@
         </activity>
         <activity android:name=".GameActivity" />
         <activity android:name=".LoadGameState" />
-        <activity android:name=".SaveActivity"></activity>
+        <activity android:name=".SaveActivity" />
+        <activity android:name=".DownloadLevelsActivity" />
+        <activity android:name=".LevelSelectActivity" />
+        <activity android:name=".ContactUsActivity"></activity>
     </application>
 
 </manifest>
