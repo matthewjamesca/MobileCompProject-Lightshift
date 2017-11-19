@@ -1,9 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="mc.group.seven.mcprojectlightshift.LevelSelectActivity">
 
-</android.support.constraint.ConstraintLayout>
+    <TextView
+        android:id="@+id/levels"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Completed Levels"
+        android:layout_centerHorizontal="true"
+        android:textStyle="normal"
+        android:textSize="30dp"
+        android:layout_marginTop="10dp"/>
+
+    <LinearLayout
+        android:id="@+id/userStat"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="1"
+        android:layout_below="@+id/levels"
+        >
+
+        <TextView
+            android:id="@+id/userName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="User name:"/>
+
+        <TextView
+            android:id="@+id/score"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Score:"
+            android:layout_marginLeft="150dp"/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/lvl1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Level 1"
+        android:layout_below="@+id/userStat"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:background="#a1a9f9"/>
+
+    <Button
+        android:id="@+id/lvl2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Level 2"
+        android:layout_below="@+id/lvl1"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:background="#a1a9f9"/>
+
+    <Button
+        android:id="@+id/lvl3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Level 3"
+        android:layout_below="@+id/lvl2"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:background="#a1a9f9"/>
+
+    <Button
+        android:id="@+id/lvl4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Level 4"
+        android:layout_below="@+id/lvl3"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:background="#a1a9f9"/>
+
+</RelativeLayout>
+
+
