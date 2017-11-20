@@ -59,8 +59,8 @@
 
     <TextView
         android:id="@+id/tv_feedback"
-        android:layout_width="196dp"
-        android:layout_height="71dp"
+        android:layout_width="197dp"
+        android:layout_height="77dp"
         android:text="@string/feedbackfield"
         tools:layout_constraintTop_creator="1"
         tools:layout_constraintBottom_creator="1"
@@ -75,7 +75,9 @@
         android:layout_marginRight="8dp"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_editor_absoluteY="418dp"
+        tools:layout_editor_absoluteX="24dp" />
 
     <Button
         android:id="@+id/btn_fb"
