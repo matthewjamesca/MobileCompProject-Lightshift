@@ -5,23 +5,19 @@ package mc.group.seven.mcprojectlightshift;
  */
 
 public class Level {
-    private String key, bestTime, name;
-    private int difficulty, bestMoves;
+    private String key, name;
+    private int difficulty, bestMoves, id;
 
-    public Level(String key, String bestTime, String name, int difficulty, int bestMoves) {
+    public Level(int id, String key, String name, int difficulty, int bestMoves) {
+        this.id = id;
         this.key = key;
         this.name = name;
-        this.bestTime = bestTime;
         this.difficulty = difficulty;
         this.bestMoves = bestMoves;
     }
 
     public String getKey() {
         return key;
-    }
-
-    public String getBestTime() {
-        return bestTime;
     }
 
     public String getName() {
@@ -36,9 +32,7 @@ public class Level {
         return bestMoves;
     }
 
-    public void setBestTime(String bestTime) {
-        this.bestTime = bestTime;
-    }
+    public int getId() { return id; }
 
     public void setBestMoves(int bestMoves) {
         this.bestMoves = bestMoves;
