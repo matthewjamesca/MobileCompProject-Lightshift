@@ -41,7 +41,7 @@ public class GameActivity extends AppCompatActivity {
 
         //load levels and determine current level
         levelList = new LevelList();
-        currentLevelId = 0;
+        currentLevelId = 2;
         gv = (GridView) this.findViewById(R.id.mygrid);
 
         //initialize both the user's board and the game key
@@ -503,39 +503,39 @@ public class GameActivity extends AppCompatActivity {
         }
         // teleporter tile logic
         else if (gameKey[currentIndex - 1].equals("[ T ]")) {
+            // replace current index
             gameBoard[currentIndex] = gameKey[currentIndex];
+            // search for second teleportation tile
             for (int i = 0; i < gameKey.length; i++) {
-                if (gameKey[i].equals("[ T ]") && i != (currentIndex + 1)) {
+                // if it equals the teleporter tile and isnt the current index
+                if (gameKey[i].equals("[ T ]") && i != (currentIndex - 1)) {
                     gameBoard[i] = "[ o ]";
                     teleporterFlag = true;
                     teleporterIndex = i;
                 }
             }
-            gameBoard[currentIndex] = gameKey[currentIndex];
         }
         // teleporter cont
         else if (gameKey[currentIndex - 1].equals("[ U ]")) {
             gameBoard[currentIndex] = gameKey[currentIndex];
             for (int i = 0; i < gameKey.length; i++) {
-                if (gameKey[i].equals("[ U ]") && i != currentIndex + 1) {
+                if (gameKey[i].equals("[ U ]") && i != currentIndex - 1) {
                     gameBoard[i] = "[ o ]";
                     teleporterFlag = true;
                     teleporterIndex = i;
                 }
             }
-            gameBoard[currentIndex] = gameKey[currentIndex];
         }
         // teleporter cont
         else if (gameKey[currentIndex - 1].equals("[ V ]")) {
             gameBoard[currentIndex] = gameKey[currentIndex];
             for (int i = 0; i < gameKey.length; i++) {
-                if (gameKey[i].equals("[ V ]") && i != currentIndex + 1) {
+                if (gameKey[i].equals("[ V ]") && i != currentIndex - 1) {
                     gameBoard[i] = "[ o ]";
                     teleporterFlag = true;
                     teleporterIndex = i;
                 }
             }
-            gameBoard[currentIndex] = gameKey[currentIndex];
         }
         else {
             gameBoard[currentIndex - 1] = "[ o ]";
