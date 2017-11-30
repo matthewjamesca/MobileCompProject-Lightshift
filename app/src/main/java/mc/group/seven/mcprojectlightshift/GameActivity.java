@@ -24,7 +24,10 @@ public class GameActivity extends AppCompatActivity {
     public CustomImageAdapter imageAdapter;
 
     /** SAVED PROGRESS OBJECTS **/
-    public boolean isCampaign;
+    public boolean isCampaign = true;
+    public int campaignProgress;
+
+
 
     /** ACTIVITY VIEW OBJECTS **/
     TextView tv_moves, tv_levelHeader, tv_feedback;
@@ -34,8 +37,6 @@ public class GameActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
-
-        isCampaign = true;
 
         // get window view
         view = this.getWindow().getDecorView().findViewById(android.R.id.content);
@@ -1004,6 +1005,7 @@ public class GameActivity extends AppCompatActivity {
                         });
                 alertDialog.setCanceledOnTouchOutside(false);
                 alertDialog.show();
+
             } else if (currentLevelId == 9 && isCampaign) {
                 AlertDialog alertDialog = new AlertDialog.Builder(GameActivity.this).create();
                 alertDialog.setTitle("Level Complete!");
