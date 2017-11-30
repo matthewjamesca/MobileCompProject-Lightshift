@@ -6,14 +6,15 @@ package mc.group.seven.mcprojectlightshift;
 
 public class Level {
     private String key, name;
-    private int difficulty, bestMoves, id;
+    private int difficulty, bestMoves, id, movesLeft;
 
-    public Level(int id, String key, String name, int difficulty, int bestMoves) {
+    public Level(int id, String key, String name, int difficulty, int bestMoves, int movesLeft) {
         this.id = id;
         this.key = key;
         this.name = name;
         this.difficulty = difficulty;
         this.bestMoves = bestMoves;
+        this.movesLeft = movesLeft;
     }
 
     public String getKey() {
@@ -33,6 +34,8 @@ public class Level {
     }
 
     public int getId() { return id; }
+
+    public int getMovesLeft() { return movesLeft; }
 
     public void setBestMoves(int bestMoves) {
         this.bestMoves = bestMoves;

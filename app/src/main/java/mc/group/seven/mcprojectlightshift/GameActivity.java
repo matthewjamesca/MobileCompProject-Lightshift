@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.GridView;
@@ -12,15 +13,20 @@ import android.widget.Toast;
 
 public class GameActivity extends AppCompatActivity {
 
+    /** GAME OBJECTS **/
     public GridView gv;
     public View view;
-    public String[] gameBoard = new String[84];
-    public String[] gameKey = new String[84];
-    int currentLevelId, currentIndex, currentMoves, exitIndex;
-    boolean exitState = false, firstTutorial = false;
+    public String[] gameBoard = new String[63];
+    public String[] gameKey = new String[63];
+    int currentLevelId, currentIndex, currentMoves, exitIndex, remainingMoves;
+    boolean exitState = false, firstTutorial = false, otherTutorial = false;
     LevelList levelList;
+    public CustomImageAdapter imageAdapter;
 
-    // Activity view objects
+    /** SAVED PROGRESS OBJECTS **/
+    public boolean isCampaign;
+
+    /** ACTIVITY VIEW OBJECTS **/
     TextView tv_moves, tv_levelHeader, tv_feedback;
     Button btn_reset, btn_fb;
 
@@ -28,6 +34,8 @@ public class GameActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
+
+        isCampaign = true;
 
         // get window view
         view = this.getWindow().getDecorView().findViewById(android.R.id.content);
@@ -41,11 +49,12 @@ public class GameActivity extends AppCompatActivity {
 
         //load levels and determine current level
         levelList = new LevelList();
-        currentLevelId = 2;
+        currentLevelId = 0;
+
         gv = (GridView) this.findViewById(R.id.mygrid);
 
         //initialize both the user's board and the game key
-        for (int i = 0; i < 84; i++) {
+        for (int i = 0; i < gameKey.length; i++) {
             gameBoard[i] = "     ";
             gameKey[i] = "     ";
         }
@@ -53,16 +62,13 @@ public class GameActivity extends AppCompatActivity {
         populateLevel(currentLevelId);
 
         // Grid adapter setup
-        CustomGridAdapter gridAdapter = new CustomGridAdapter(GameActivity.this, gameBoard);
-        gv.setAdapter(gridAdapter);
+        imageAdapter = new CustomImageAdapter(this);
+        gv.setAdapter(imageAdapter);
 
-        //begin listening
-        setupListeners();
+        gv.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
+        gv.setVerticalScrollBarEnabled(false);
 
-        /** TUTORIAL LEVEL **/
-        if (currentLevelId == 0) {
-            tutorialLevel();
-        }
+        updateView();
     }
 
     /**
@@ -70,8 +76,21 @@ public class GameActivity extends AppCompatActivity {
      * @param currentLevelId
      */
     private void populateLevel(int currentLevelId) {
+        /** TUTORIAL LEVEL **/
         if (currentLevelId == 0) {
             firstTutorial = true;
+            tutorialLevel();
+        }
+        else if (currentLevelId == 5) {
+            teleportationTutorial();
+            otherTutorial = true;
+        }
+        else if (currentLevelId == 7) {
+            maxMovesTutorial();
+            otherTutorial = true;
+        }
+        else {
+            btn_fb.setVisibility(View.INVISIBLE);
         }
 
         int levelIndex = 0;
@@ -83,6 +102,8 @@ public class GameActivity extends AppCompatActivity {
         }
 
         tv_levelHeader.setText(levelList.getLevels().get(levelIndex).getName());
+
+        remainingMoves = levelList.getLevels().get(levelIndex).getMovesLeft();
 
         String levelKey = levelList.getLevels().get(levelIndex).getKey();
 
@@ -109,6 +130,30 @@ public class GameActivity extends AppCompatActivity {
                 currentIndex = tileIndex;
             }
         }
+
+        if (!firstTutorial && !otherTutorial) {
+            int yellowCount = 0;
+
+            for (int i = 0; i < gameKey.length; i++) {
+                if (gameKey[i].equals("[ Y ]")) {
+                    yellowCount++;
+                }
+            }
+
+            if (yellowCount != 0) {
+                if (remainingMoves != -1) {
+                    tv_feedback.setText("Yellow Tiles Remaining: " + yellowCount + "\nMoves Left: " + (remainingMoves - currentMoves));
+                } else {
+                    tv_feedback.setText("Yellow Tiles Remaining: " + yellowCount);
+                }
+            } else {
+                if (remainingMoves != -1) {
+                    tv_feedback.setText("Exit open!" + "\nMoves Left: " + (remainingMoves - currentMoves));
+                } else {
+                    tv_feedback.setText("Exit open!");
+                }
+            }
+        }
     }
 
     /**
@@ -116,32 +161,45 @@ public class GameActivity extends AppCompatActivity {
      */
     private void resetGame() {
         //initialize both the user's board and the game key
-        for (int i = 0; i < 84; i++) {
+        for (int i = 0; i < gameKey.length; i++) {
             gameBoard[i] = "     ";
             gameKey[i] = "     ";
         }
         currentMoves = 0;
         populateLevel(currentLevelId);
 
+        if (currentLevelId == 0) {
+            firstTutorial = true;
+        }
+
         //initialize other activity components
         tv_moves.setText("Moves: " + currentMoves);
 
         int yellowCount = 0;
 
-        for (int i = 0; i < 84; i++) {
+        for (int i = 0; i < gameKey.length; i++) {
             if (gameKey[i].equals("[ Y ]")) {
                 yellowCount++;
             }
         }
 
-        if (yellowCount!=0) {
-            tv_feedback.setText("Yellow Tiles Remaining: " + yellowCount);
-        }
-        else {
-            tv_feedback.setText("Exit open!");
+        if (!firstTutorial && !otherTutorial) {
+            if (yellowCount != 0) {
+                if (remainingMoves != -1) {
+                    tv_feedback.setText("Yellow Tiles Remaining: " + yellowCount + "\nMoves Left: " + (remainingMoves - currentMoves));
+                } else {
+                    tv_feedback.setText("Yellow Tiles Remaining: " + yellowCount);
+                }
+            } else {
+                if (remainingMoves != -1) {
+                    tv_feedback.setText("Exit open!" + "\nMoves Left: " + (remainingMoves - currentMoves));
+                } else {
+                    tv_feedback.setText("Exit open!");
+                }
+            }
         }
 
-        gv.invalidateViews();
+        updateView();
     }
 
     /**
@@ -167,19 +225,19 @@ public class GameActivity extends AppCompatActivity {
             }
             @Override
             public void onSwipeRight() {
-                if (!gameKey[currentIndex + 1].equals("     ") && !gameKey[currentIndex - 1].equals("[ X ]")) {
+                if (!gameKey[currentIndex + 1].equals("     ") && !gameKey[currentIndex + 1].equals("[ X ]")) {
                     moveRight();
                 }
             }
             @Override
             public void onSwipeUp() {
-                if (!gameKey[currentIndex - 7].equals("     ") && !gameKey[currentIndex - 1].equals("[ X ]")) {
+                if (!gameKey[currentIndex - 7].equals("     ") && !gameKey[currentIndex - 7].equals("[ X ]")) {
                     moveUp();
                 }
             }
             @Override
             public void onSwipeDown() {
-                if (!gameKey[currentIndex + 7].equals("     ") && !gameKey[currentIndex - 1].equals("[ X ]")) {
+                if (!gameKey[currentIndex + 7].equals("     ") && !gameKey[currentIndex + 7].equals("[ X ]")) {
                     moveDown();
                 }
             }
@@ -195,19 +253,19 @@ public class GameActivity extends AppCompatActivity {
             }
             @Override
             public void onSwipeRight() {
-                if (!gameKey[currentIndex + 1].equals("     ") && !gameKey[currentIndex - 1].equals("[ X ]")) {
+                if (!gameKey[currentIndex + 1].equals("     ") && !gameKey[currentIndex + 1].equals("[ X ]")) {
                     moveRight();
                 }
             }
             @Override
             public void onSwipeUp() {
-                if (!gameKey[currentIndex - 7].equals("     ") && !gameKey[currentIndex - 1].equals("[ X ]")) {
+                if (!gameKey[currentIndex - 7].equals("     ") && !gameKey[currentIndex - 7].equals("[ X ]")) {
                     moveUp();
                 }
             }
             @Override
             public void onSwipeDown() {
-                if (!gameKey[currentIndex + 7].equals("     ") && !gameKey[currentIndex - 1].equals("[ X ]")) {
+                if (!gameKey[currentIndex + 7].equals("     ") && !gameKey[currentIndex + 7].equals("[ X ]")) {
                     moveDown();
                 }
             }
@@ -218,7 +276,72 @@ public class GameActivity extends AppCompatActivity {
      * Updates game board
      */
     public void updateView() {
+        for (int i = 0; i < gameKey.length; i++) {
+            imageAdapter.mThumbIds[i] = null;
+        }
+
+        Integer[] newView = new Integer[gameKey.length];
+
+        for (int i = 0; i < gameKey.length; i++) {
+            if (gameBoard[i].equals("[ Y ]") && gameKey[i].equals("[ Y ]")) {
+                newView[i] = R.drawable.yellowemptytile;
+            }
+            else if (gameBoard[i].equals("[ B ]") && gameKey[i].equals("[ B ]")) {
+                newView[i] = R.drawable.blueemptytile;
+            }
+            else if (gameBoard[i].equals("[ G ]") && gameKey[i].equals("[ G ]")) {
+                newView[i] = R.drawable.greyemptytile;
+            }
+            else if (gameBoard[i].equals("[ o ]") && gameKey[i].equals("[ Y ]")) {
+                newView[i] = R.drawable.yellowoccupiedtile;
+            }
+            else if (gameBoard[i].equals("[ o ]") && gameKey[i].equals("[ B ]")) {
+                newView[i] = R.drawable.blueoccupiedtile;
+            }
+            else if (gameBoard[i].equals("[ o ]") && gameKey[i].equals("[ T ]")) {
+                newView[i] = R.drawable.teleportertoccupied;
+            }
+            else if (gameBoard[i].equals("[ T ]") && gameKey[i].equals("[ T ]")) {
+                newView[i] = R.drawable.teleportertempty;
+            }
+            else if (gameBoard[i].equals("[ o ]") && gameKey[i].equals("[ U ]")) {
+                newView[i] = R.drawable.teleporteruoccupied;
+            }
+            else if (gameBoard[i].equals("[ U ]") && gameKey[i].equals("[ U ]")) {
+                newView[i] = R.drawable.teleporteruempty;
+            }
+            else if (gameBoard[i].equals("[ o ]") && gameKey[i].equals("[ V ]")) {
+                newView[i] = R.drawable.teleportervoccupied;
+            }
+            else if (gameBoard[i].equals("[ V ]") && gameKey[i].equals("[ V ]")) {
+                newView[i] = R.drawable.teleportervempty;
+            }
+            else if (gameBoard[i].equals("[ o ]") && gameKey[i].equals("[ G ]")) {
+                newView[i] = R.drawable.greyoccupiedtile;
+            }
+            else if (gameBoard[i].equals("[ X ]")) {
+                newView[i] = R.drawable.closedexittile;
+            }
+            else if (gameBoard[i].equals("[ E ]")) {
+                newView[i] = R.drawable.openexittile;
+            }
+            else {
+                newView[i] = R.drawable.emptytile;
+            }
+        }
+
+        imageAdapter.mThumbIds = newView;
+
+        imageAdapter.notifyDataSetChanged();
+
+        gv.setAdapter(imageAdapter);
+
         gv.invalidateViews();
+
+        if (firstTutorial || otherTutorial) {
+            removeListeners();
+        }
+
     }
 
     /**
@@ -236,6 +359,8 @@ public class GameActivity extends AppCompatActivity {
     public void tutorialLevel() {
 
         removeListeners();
+
+        btn_fb.setVisibility(View.VISIBLE);
 
         tv_feedback.setText("Welcome to LightShift! Please hit the 'OK' button to the " +
                 "right to continue...");
@@ -260,6 +385,95 @@ public class GameActivity extends AppCompatActivity {
         });
     }
 
+    public void teleportationTutorial() {
+
+        removeListeners();
+
+        btn_fb.setVisibility(View.VISIBLE);
+
+        tv_feedback.setText("Whoa! A teleporter! Each teleporter has two tiles of the same color. " +
+                "If you step on one, you will teleport to the other end! Give it a try! (Press OK to" +
+                " continue)");
+
+        btn_fb.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                setupListeners();
+                btn_fb.setVisibility(View.INVISIBLE);
+                btn_fb.setOnClickListener(null);
+
+                otherTutorial = false;
+
+                int yellowCount = 0;
+
+                for (int i = 0; i < gameKey.length; i++) {
+                    if (gameKey[i].equals("[ Y ]")) {
+                        yellowCount++;
+                    }
+                }
+
+                if (!firstTutorial && !otherTutorial) {
+                    if (yellowCount != 0) {
+                        if (remainingMoves != -1) {
+                            tv_feedback.setText("Yellow Tiles Remaining: " + yellowCount + "\nMoves Left: " + (remainingMoves - currentMoves));
+                        } else {
+                            tv_feedback.setText("Yellow Tiles Remaining: " + yellowCount);
+                        }
+                    } else {
+                        if (remainingMoves != -1) {
+                            tv_feedback.setText("Exit open!" + "\nMoves Left: " + (remainingMoves - currentMoves));
+                        } else {
+                            tv_feedback.setText("Exit open!");
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    public void maxMovesTutorial() {
+        removeListeners();
+
+        btn_fb.setVisibility(View.VISIBLE);
+
+        tv_feedback.setText("Uh oh...You now only have a max amount of " +
+                "moves that you can make to reach the exit! If you don't make it in time, you will fail." +
+                " Good luck! (Press OK to Continue)");
+
+        btn_fb.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                setupListeners();
+                btn_fb.setVisibility(View.INVISIBLE);
+                btn_fb.setOnClickListener(null);
+
+                otherTutorial = false;
+
+                int yellowCount = 0;
+
+                for (int i = 0; i < gameKey.length; i++) {
+                    if (gameKey[i].equals("[ Y ]")) {
+                        yellowCount++;
+                    }
+                }
+
+                if (!firstTutorial && !otherTutorial) {
+                    if (yellowCount != 0) {
+                        if (remainingMoves != -1) {
+                            tv_feedback.setText("Yellow Tiles Remaining: " + yellowCount + "\nMoves Left: " + (remainingMoves - currentMoves));
+                        } else {
+                            tv_feedback.setText("Yellow Tiles Remaining: " + yellowCount);
+                        }
+                    } else {
+                        if (remainingMoves != -1) {
+                            tv_feedback.setText("Exit open!" + "\nMoves Left: " + (remainingMoves - currentMoves));
+                        } else {
+                            tv_feedback.setText("Exit open!");
+                        }
+                    }
+                }
+            }
+        });
+    }
+
     /**
      * moves the player up a tile
      */
@@ -272,12 +486,13 @@ public class GameActivity extends AppCompatActivity {
         // if its an open exit, declare level won + logic
         if (gameKey[currentIndex - 7].equals("[ E ]")) {
             finishLevel();
+            return;
         }
         // teleporter tile logic
         else if (gameKey[currentIndex - 7].equals("[ T ]")) {
             gameBoard[currentIndex] = gameKey[currentIndex];
             for (int i = 0; i < gameKey.length; i++) {
-                if (gameKey[i].equals("[ T ]") && i != currentIndex + 1) {
+                if (gameKey[i].equals("[ T ]") && i != currentIndex - 7) {
                     gameBoard[i] = "[ o ]";
                     teleporterFlag = true;
                     teleporterIndex = i;
@@ -288,7 +503,7 @@ public class GameActivity extends AppCompatActivity {
         else if (gameKey[currentIndex - 7].equals("[ U ]")) {
             gameBoard[currentIndex] = gameKey[currentIndex];
             for (int i = 0; i < gameKey.length; i++) {
-                if (gameKey[i].equals("[ U ]") && i != currentIndex + 1) {
+                if (gameKey[i].equals("[ U ]") && i != currentIndex - 7) {
                     gameBoard[i] = "[ o ]";
                     teleporterFlag = true;
                     teleporterIndex = i;
@@ -299,7 +514,7 @@ public class GameActivity extends AppCompatActivity {
         else if (gameKey[currentIndex - 7].equals("[ V ]")) {
             gameBoard[currentIndex] = gameKey[currentIndex];
             for (int i = 0; i < gameKey.length; i++) {
-                if (gameKey[i].equals("[ V ]") && i != currentIndex + 1) {
+                if (gameKey[i].equals("[ V ]") && i != currentIndex - 7) {
                     gameBoard[i] = "[ o ]";
                     teleporterFlag = true;
                     teleporterIndex = i;
@@ -320,7 +535,7 @@ public class GameActivity extends AppCompatActivity {
         }
 
         exitState = true;
-        for (int i = 0; i < 84; i++) {
+        for (int i = 0; i < gameKey.length; i++) {
             if (gameKey[i].equals("[ Y ]")) {
                 exitState = false;
             }
@@ -368,17 +583,32 @@ public class GameActivity extends AppCompatActivity {
         else {
             int yellowCount = 0;
 
-            for (int i = 0; i < 84; i++) {
+            for (int i = 0; i < gameKey.length; i++) {
                 if (gameKey[i].equals("[ Y ]")) {
                     yellowCount++;
                 }
             }
 
+            if (remainingMoves != -1 && remainingMoves - currentMoves == 0) {
+                levelFailed();
+                return;
+            }
+
             if (yellowCount!=0) {
-                tv_feedback.setText("Yellow Tiles Remaining: " + yellowCount);
+                if (remainingMoves != -1) {
+                    tv_feedback.setText("Yellow Tiles Remaining: " + yellowCount + "\nMoves Left: " + (remainingMoves - currentMoves));
+                }
+                else {
+                    tv_feedback.setText("Yellow Tiles Remaining: " + yellowCount);
+                }
             }
             else {
-                tv_feedback.setText("Exit open!");
+                if (remainingMoves != -1) {
+                    tv_feedback.setText("Exit open!" + "\nMoves Left: " + (remainingMoves - currentMoves));
+                }
+                else {
+                    tv_feedback.setText("Exit open!");
+                }
             }
         }
 
@@ -397,12 +627,13 @@ public class GameActivity extends AppCompatActivity {
         // if its an open exit, declare level won + logic
         if (gameKey[currentIndex + 7].equals("[ E ]")) {
             finishLevel();
+            return;
         }
         // teleporter tile logic
         else if (gameKey[currentIndex + 7].equals("[ T ]")) {
             gameBoard[currentIndex] = gameKey[currentIndex];
             for (int i = 0; i < gameKey.length; i++) {
-                if (gameKey[i].equals("[ T ]") && i != currentIndex + 1) {
+                if (gameKey[i].equals("[ T ]") && i != currentIndex + 7) {
                     gameBoard[i] = "[ o ]";
                     teleporterFlag = true;
                     teleporterIndex = i;
@@ -413,7 +644,7 @@ public class GameActivity extends AppCompatActivity {
         else if (gameKey[currentIndex + 7].equals("[ U ]")) {
             gameBoard[currentIndex] = gameKey[currentIndex];
             for (int i = 0; i < gameKey.length; i++) {
-                if (gameKey[i].equals("[ U ]") && i != currentIndex + 1) {
+                if (gameKey[i].equals("[ U ]") && i != currentIndex + 7) {
                     gameBoard[i] = "[ o ]";
                     teleporterFlag = true;
                     teleporterIndex = i;
@@ -424,7 +655,7 @@ public class GameActivity extends AppCompatActivity {
         else if (gameKey[currentIndex + 7].equals("[ V ]")) {
             gameBoard[currentIndex] = gameKey[currentIndex];
             for (int i = 0; i < gameKey.length; i++) {
-                if (gameKey[i].equals("[ V ]") && i != currentIndex + 1) {
+                if (gameKey[i].equals("[ V ]") && i != currentIndex + 7) {
                     gameBoard[i] = "[ o ]";
                     teleporterFlag = true;
                     teleporterIndex = i;
@@ -445,7 +676,7 @@ public class GameActivity extends AppCompatActivity {
         }
 
         exitState = true;
-        for (int i = 0; i < 84; i++) {
+        for (int i = 0; i < gameKey.length; i++) {
             if (gameKey[i].equals("[ Y ]")) {
                 exitState = false;
             }
@@ -473,17 +704,32 @@ public class GameActivity extends AppCompatActivity {
         if (!firstTutorial) {
             int yellowCount = 0;
 
-            for (int i = 0; i < 84; i++) {
+            for (int i = 0; i < gameKey.length; i++) {
                 if (gameKey[i].equals("[ Y ]")) {
                     yellowCount++;
                 }
             }
 
+            if (remainingMoves != -1 && remainingMoves - currentMoves == 0) {
+                levelFailed();
+                return;
+            }
+
             if (yellowCount!=0) {
-                tv_feedback.setText("Yellow Tiles Remaining: " + yellowCount);
+                if (remainingMoves != -1) {
+                    tv_feedback.setText("Yellow Tiles Remaining: " + yellowCount + "\nMoves Left: " + (remainingMoves - currentMoves));
+                }
+                else {
+                    tv_feedback.setText("Yellow Tiles Remaining: " + yellowCount);
+                }
             }
             else {
-                tv_feedback.setText("Exit open!");
+                if (remainingMoves != -1) {
+                    tv_feedback.setText("Exit open!" + "\nMoves Left: " + (remainingMoves - currentMoves));
+                }
+                else {
+                    tv_feedback.setText("Exit open!");
+                }
             }
         }
 
@@ -497,9 +743,11 @@ public class GameActivity extends AppCompatActivity {
         //teleporter logic variables
         boolean teleporterFlag = false;
         int teleporterIndex = -1;
+
         // if its an open exit, declare level won + logic
         if (gameKey[currentIndex - 1].equals("[ E ]")) {
             finishLevel();
+            return;
         }
         // teleporter tile logic
         else if (gameKey[currentIndex - 1].equals("[ T ]")) {
@@ -552,7 +800,7 @@ public class GameActivity extends AppCompatActivity {
 
         // check if exit tile should be opened
         exitState = true;
-        for (int i = 0; i < 84; i++) {
+        for (int i = 0; i < gameKey.length; i++) {
             if (gameKey[i].equals("[ Y ]")) {
                 exitState = false;
             }
@@ -576,22 +824,39 @@ public class GameActivity extends AppCompatActivity {
             currentIndex = currentIndex - 1;
         }
         else {
+            Log.d("Index", "" + teleporterIndex);
             currentIndex = teleporterIndex;
         }
 
         if (!firstTutorial) {
             int yellowCount = 0;
 
-            for (int i = 0; i < 84; i++) {
+            for (int i = 0; i < gameKey.length; i++) {
                 if (gameKey[i].equals("[ Y ]")) {
                     yellowCount++;
                 }
             }
 
-            if (yellowCount != 0) {
-                tv_feedback.setText("Yellow Tiles Remaining: " + yellowCount);
-            } else {
-                tv_feedback.setText("Exit open!");
+            if (remainingMoves != -1 && remainingMoves - currentMoves == 0) {
+                levelFailed();
+                return;
+            }
+
+            if (yellowCount!=0) {
+                if (remainingMoves != -1) {
+                    tv_feedback.setText("Yellow Tiles Remaining: " + yellowCount + "\nMoves Left: " + (remainingMoves - currentMoves));
+                }
+                else {
+                    tv_feedback.setText("Yellow Tiles Remaining: " + yellowCount);
+                }
+            }
+            else {
+                if (remainingMoves != -1) {
+                    tv_feedback.setText("Exit open!" + "\nMoves Left: " + (remainingMoves - currentMoves));
+                }
+                else {
+                    tv_feedback.setText("Exit open!");
+                }
             }
         }
 
@@ -608,6 +873,7 @@ public class GameActivity extends AppCompatActivity {
         // if its an open exit, declare level won + logic
         if (gameKey[currentIndex + 1].equals("[ E ]")) {
             finishLevel();
+            return;
         }
         // teleporter tile logic
         else if (gameKey[currentIndex + 1].equals("[ T ]")) {
@@ -657,7 +923,7 @@ public class GameActivity extends AppCompatActivity {
 
 
         exitState = true;
-        for (int i = 0; i < 84; i++) {
+        for (int i = 0; i < gameKey.length; i++) {
             if (gameKey[i].equals("[ Y ]")) {
                 exitState = false;
             }
@@ -687,16 +953,32 @@ public class GameActivity extends AppCompatActivity {
         if (!firstTutorial) {
             int yellowCount = 0;
 
-            for (int i = 0; i < 84; i++) {
+            for (int i = 0; i < gameKey.length; i++) {
                 if (gameKey[i].equals("[ Y ]")) {
                     yellowCount++;
                 }
             }
 
-            if (yellowCount != 0) {
-                tv_feedback.setText("Yellow Tiles Remaining: " + yellowCount);
-            } else {
-                tv_feedback.setText("Exit open!");
+            if (remainingMoves != -1 && remainingMoves - currentMoves == 0) {
+                levelFailed();
+                return;
+            }
+
+            if (yellowCount!=0) {
+                if (remainingMoves != -1) {
+                    tv_feedback.setText("Yellow Tiles Remaining: " + yellowCount + "\nMoves Left: " + (remainingMoves - currentMoves));
+                }
+                else {
+                    tv_feedback.setText("Yellow Tiles Remaining: " + yellowCount);
+                }
+            }
+            else {
+                if (remainingMoves != -1) {
+                    tv_feedback.setText("Exit open!" + "\nMoves Left: " + (remainingMoves - currentMoves));
+                }
+                else {
+                    tv_feedback.setText("Exit open!");
+                }
             }
         }
 
@@ -704,41 +986,74 @@ public class GameActivity extends AppCompatActivity {
     }
 
     public void finishLevel() {
-        if (currentLevelId == 0) {
-            AlertDialog alertDialog = new AlertDialog.Builder(GameActivity.this).create();
-            alertDialog.setTitle("Level Complete!");
-            alertDialog.setMessage("Congratulations on finishing the tutorial level." +
-                    " Click OK to continue your LightShift journey.");
-            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                            currentLevelId++;
-                            resetGame();
-                            populateLevel(currentLevelId);
-                            resetGame();
-                        }
-                    });
-            alertDialog.show();
+        if (isCampaign) {
+            if (currentLevelId == 0) {
+                AlertDialog alertDialog = new AlertDialog.Builder(GameActivity.this).create();
+                alertDialog.setTitle("Level Complete!");
+                alertDialog.setMessage("Congratulations on finishing the tutorial level." +
+                        " Click OK to continue your LightShift journey.");
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                currentLevelId++;
+                                resetGame();
+                                populateLevel(currentLevelId);
+                                resetGame();
+                            }
+                        });
+                alertDialog.setCanceledOnTouchOutside(false);
+                alertDialog.show();
+            } else if (currentLevelId == 9 && isCampaign) {
+                AlertDialog alertDialog = new AlertDialog.Builder(GameActivity.this).create();
+                alertDialog.setTitle("Level Complete!");
+                alertDialog.setMessage("Congratulations on completing the campaign! Make sure" +
+                        " to check the Downloadable Levels if you would like to continue your adventure!\n\n"
+                        + "Moves Taken: " + currentMoves + " moves.\n" + "Moves Record: " + currentMoves + " " +
+                        "moves.");
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                resetGame();
+                                finish();
+                            }
+                        });
+                alertDialog.setCanceledOnTouchOutside(false);
+                alertDialog.show();
+            } else {
+                AlertDialog alertDialog = new AlertDialog.Builder(GameActivity.this).create();
+                alertDialog.setTitle("Level Complete!");
+                alertDialog.setMessage("Moves Taken: " + currentMoves + " moves.\n" +
+                        "Moves Record: " + currentMoves + " moves.");
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                currentLevelId++;
+                                resetGame();
+                                populateLevel(currentLevelId);
+                                resetGame();
+                            }
+                        });
+                alertDialog.setCanceledOnTouchOutside(false);
+                alertDialog.show();
+            }
         }
-        else {
-            AlertDialog alertDialog = new AlertDialog.Builder(GameActivity.this).create();
-            alertDialog.setTitle("Level Complete!");
-            //TODO
-            //IMPLEMENT BEST MOVES
-            alertDialog.setMessage("Moves Taken: " + currentMoves + " moves.\n" +
-                    "Moves Record: " + currentMoves + " moves.");
-            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                    new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                            currentLevelId++;
-                            resetGame();
-                            populateLevel(currentLevelId);
-                            resetGame();
-                        }
-                    });
-            alertDialog.show();
-        }
+    }
+
+    public void levelFailed() {
+        AlertDialog alertDialog = new AlertDialog.Builder(GameActivity.this).create();
+        alertDialog.setTitle("Level Faied!");
+        alertDialog.setMessage("You ran out of moves. Click OK to try again!");
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        resetGame();
+                    }
+                });
+        alertDialog.setCanceledOnTouchOutside(false);
+        alertDialog.show();
     }
 }
