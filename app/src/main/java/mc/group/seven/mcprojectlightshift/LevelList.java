@@ -1,5 +1,8 @@
 package mc.group.seven.mcprojectlightshift;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -47,6 +50,11 @@ public class LevelList implements Serializable{
         Level lvl7 = new Level(7, lvl7str, "Level 7 - A New Constraint", 0, -1, 13);
         Level lvl8 = new Level(8, lvl8str, "Level 8 - Budgeted", 0, -1, 13);
         Level lvl9 = new Level(9, lvl9str, "Level 9 - A Final Test", 0, -1, 25);
+
+
+        DatabaseReference mDatabase;
+        mDatabase = FirebaseDatabase.getInstance().getReference("level");
+        mDatabase.child("0").setValue(lvl0str+"/"+"Level 0 - Learning to Shift"+"/"+0+"/"+-1+"/"+-1);
 
         addLevel(lvl0);
         addLevel(lvl1);
