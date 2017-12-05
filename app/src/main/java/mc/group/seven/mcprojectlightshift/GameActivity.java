@@ -1,6 +1,9 @@
 package mc.group.seven.mcprojectlightshift;
 
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.media.MediaPlayer;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,6 +16,9 @@ import android.widget.Toast;
 
 public class GameActivity extends AppCompatActivity {
 
+    /** FILE STORAGE **/
+    public static final String PREFS_NAME = "MyPrefsFile";
+
     /** GAME OBJECTS **/
     public GridView gv;
     public View view;
@@ -22,12 +28,10 @@ public class GameActivity extends AppCompatActivity {
     boolean exitState = false, firstTutorial = false, otherTutorial = false;
     LevelList levelList;
     public CustomImageAdapter imageAdapter;
+    public SoundPlayer sp = new SoundPlayer();
 
     /** SAVED PROGRESS OBJECTS **/
     public boolean isCampaign = true;
-    public int campaignProgress;
-
-
 
     /** ACTIVITY VIEW OBJECTS **/
     TextView tv_moves, tv_levelHeader, tv_feedback;
@@ -37,6 +41,26 @@ public class GameActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
+
+        // Check if the game was opened from campaign mode or level select mode.
+        Intent intent = getIntent();
+        String openFrom = intent.getExtras().getString("openFrom");
+
+        // get current level status of user from storage.
+        if (openFrom.equals("c")) {
+            isCampaign = true;
+            SharedPreferences savedProgress = getSharedPreferences(PREFS_NAME, 0);
+            currentLevelId = savedProgress.getInt("currentCampaignLevel", 0);
+
+            if (currentLevelId == -1) {
+                currentLevelId = 1;
+            }
+        }
+        else {
+            isCampaign = false;
+            String levelid = intent.getExtras().getString("levelToOpen");
+            currentLevelId = Integer.parseInt(levelid);
+        }
 
         // get window view
         view = this.getWindow().getDecorView().findViewById(android.R.id.content);
@@ -50,7 +74,6 @@ public class GameActivity extends AppCompatActivity {
 
         //load levels and determine current level
         levelList = new LevelList();
-        currentLevelId = 0;
 
         gv = (GridView) this.findViewById(R.id.mygrid);
 
@@ -65,10 +88,10 @@ public class GameActivity extends AppCompatActivity {
         // Grid adapter setup
         imageAdapter = new CustomImageAdapter(this);
         gv.setAdapter(imageAdapter);
-
         gv.setStretchMode(GridView.STRETCH_COLUMN_WIDTH);
         gv.setVerticalScrollBarEnabled(false);
 
+        // Update the view after level is populated.
         updateView();
     }
 
@@ -77,23 +100,28 @@ public class GameActivity extends AppCompatActivity {
      * @param currentLevelId
      */
     private void populateLevel(int currentLevelId) {
-        /** TUTORIAL LEVEL **/
+        /** TUTORIAL LEVELS
+         *  Right here we're just setting tutorial status on
+         *  certain levels which introduce new mechanics.
+         * **/
         if (currentLevelId == 0) {
             firstTutorial = true;
             tutorialLevel();
         }
-        else if (currentLevelId == 5) {
+        else if (currentLevelId == 5 && isCampaign) {
             teleportationTutorial();
             otherTutorial = true;
         }
-        else if (currentLevelId == 7) {
+        else if (currentLevelId == 7 && isCampaign) {
             maxMovesTutorial();
             otherTutorial = true;
         }
         else {
             btn_fb.setVisibility(View.INVISIBLE);
+            setupListeners();
         }
 
+        // Grabbing the level that will currently be played.
         int levelIndex = 0;
 
         for (int i = 0; i < levelList.getLevels().size(); i++) {
@@ -102,6 +130,7 @@ public class GameActivity extends AppCompatActivity {
             }
         }
 
+        // Initializing the view objects and setting them to starting values.
         tv_levelHeader.setText(levelList.getLevels().get(levelIndex).getName());
 
         remainingMoves = levelList.getLevels().get(levelIndex).getMovesLeft();
@@ -113,6 +142,7 @@ public class GameActivity extends AppCompatActivity {
         int tileIndex = -1;
         String tileType = "";
 
+        // Building the game board and key based off of the given level
         for (int i = 0; i < levelComponents.length; i+=2) {
             if (!levelComponents[i+1].equals("s")) {
                 if (levelComponents[i+1].equals("x")) {
@@ -132,6 +162,7 @@ public class GameActivity extends AppCompatActivity {
             }
         }
 
+        // Setting the moves remaining/yellow tiles remaining.
         if (!firstTutorial && !otherTutorial) {
             int yellowCount = 0;
 
@@ -184,6 +215,7 @@ public class GameActivity extends AppCompatActivity {
             }
         }
 
+        //initialize the users remaining moves / remaining yellow tiles.
         if (!firstTutorial && !otherTutorial) {
             if (yellowCount != 0) {
                 if (remainingMoves != -1) {
@@ -200,6 +232,7 @@ public class GameActivity extends AppCompatActivity {
             }
         }
 
+        //update the view.
         updateView();
     }
 
@@ -215,11 +248,11 @@ public class GameActivity extends AppCompatActivity {
             }
         });
 
-        // Swipe listeners and movement game logic
+        // Swipe listeners and movement game logic, for the gridview portion of the screen
         gv.setOnTouchListener(new OnSwipeTouchListener(getApplicationContext()) {
             @Override
             public void onSwipeLeft() {
-                // if its a valid tile to move to...
+                // if its a valid tile to move to, move in that direction.
                 if (!gameKey[currentIndex - 1].equals("     ") && !gameKey[currentIndex - 1].equals("[ X ]")) {
                     moveLeft();
                 }
@@ -244,6 +277,7 @@ public class GameActivity extends AppCompatActivity {
             }
         });
 
+        // swipe listeners for the rest of the screen
         view.setOnTouchListener(new OnSwipeTouchListener(getApplicationContext()) {
             @Override
             public void onSwipeLeft() {
@@ -274,15 +308,19 @@ public class GameActivity extends AppCompatActivity {
     }
 
     /**
-     * Updates game board
+     * Updates game board based on player movement and game state
      */
     public void updateView() {
+
+        // clears the current grid
         for (int i = 0; i < gameKey.length; i++) {
             imageAdapter.mThumbIds[i] = null;
         }
 
+        // instantiates the new grid
         Integer[] newView = new Integer[gameKey.length];
 
+        // populates each tile based on the game board and game key status with images
         for (int i = 0; i < gameKey.length; i++) {
             if (gameBoard[i].equals("[ Y ]") && gameKey[i].equals("[ Y ]")) {
                 newView[i] = R.drawable.yellowemptytile;
@@ -331,6 +369,7 @@ public class GameActivity extends AppCompatActivity {
             }
         }
 
+        // sets the view and updates it on screen.
         imageAdapter.mThumbIds = newView;
 
         imageAdapter.notifyDataSetChanged();
@@ -346,7 +385,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     /**
-     * Removes the listeners to lock game state
+     * Removes the listeners to lock game state for tutorials.
      */
     public void removeListeners() {
         view.setOnTouchListener(null);
@@ -356,11 +395,14 @@ public class GameActivity extends AppCompatActivity {
 
     /**
      * Code for the first level - special due to tutorial
+     * Teaches user how to play.
      */
     public void tutorialLevel() {
 
         removeListeners();
 
+        // displays tutorial text and adds/removes listeners depending on the current
+        // instruction given to the player.
         btn_fb.setVisibility(View.VISIBLE);
 
         tv_feedback.setText("Welcome to LightShift! Please hit the 'OK' button to the " +
@@ -386,7 +428,12 @@ public class GameActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * teaches the user about teleportation tiles
+     */
     public void teleportationTutorial() {
+
+        // removes listeners until the user proceeds with reading and confirming
 
         removeListeners();
 
@@ -412,6 +459,7 @@ public class GameActivity extends AppCompatActivity {
                     }
                 }
 
+                // sets the count back after tutorial is finished.
                 if (!firstTutorial && !otherTutorial) {
                     if (yellowCount != 0) {
                         if (remainingMoves != -1) {
@@ -431,7 +479,14 @@ public class GameActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * teach the user that there is a new constraint
+     * in the game, and that they only have a certain
+     * amount of moves.
+     */
     public void maxMovesTutorial() {
+
+        // like other tutorials, locks the listeners until the user reads and confirms...
         removeListeners();
 
         btn_fb.setVisibility(View.VISIBLE);
@@ -456,6 +511,8 @@ public class GameActivity extends AppCompatActivity {
                     }
                 }
 
+                // sets back normal feedback with yellow tiles and moves remaining counts.
+
                 if (!firstTutorial && !otherTutorial) {
                     if (yellowCount != 0) {
                         if (remainingMoves != -1) {
@@ -479,6 +536,8 @@ public class GameActivity extends AppCompatActivity {
      * moves the player up a tile
      */
     public void moveUp() {
+        //play sound
+        sp.play(getApplicationContext(), R.raw.move_sound);
 
         //teleporter logic variables
         boolean teleporterFlag = false;
@@ -522,10 +581,12 @@ public class GameActivity extends AppCompatActivity {
                 }
             }
         }
+        // otherwise just move the player in that direction
         else {
             gameBoard[currentIndex - 7] = "[ o ]";
         }
 
+        // update the indexes of the game board and game key
         gameBoard[currentIndex] = gameKey[currentIndex];
 
         if (gameKey[currentIndex - 7].equals("[ Y ]")) {
@@ -535,6 +596,8 @@ public class GameActivity extends AppCompatActivity {
             gameKey[currentIndex - 7] = "[ Y ]";
         }
 
+        //check the state of the interchangable tiles, if theyre all blue, open the exit.
+        //and update the game key status.
         exitState = true;
         for (int i = 0; i < gameKey.length; i++) {
             if (gameKey[i].equals("[ Y ]")) {
@@ -546,6 +609,7 @@ public class GameActivity extends AppCompatActivity {
             gameBoard[exitIndex] = "[ E ]";
             gameKey[exitIndex] = "[ E ]";
         }
+        // otherwise keep the exit closed.
         else {
             gameBoard[exitIndex] = "[ X ]";
             gameKey[exitIndex] = "[ X ]";
@@ -554,6 +618,8 @@ public class GameActivity extends AppCompatActivity {
         currentMoves++;
         tv_moves.setText("Moves: " + currentMoves);
 
+        // if a teleporter was used, directly alter the new current index to the
+        // other end of the teleporter.
         if (!teleporterFlag) {
             currentIndex = currentIndex - 7;
         }
@@ -561,6 +627,7 @@ public class GameActivity extends AppCompatActivity {
             currentIndex = teleporterIndex;
         }
 
+        // tutorial text if user is on first tutorial.
         if (firstTutorial) {
             tv_feedback.setText("Great job! Two final points before you begin..." +
                     "grey tiles do not change when moved on, and you can reset your game at" +
@@ -581,6 +648,8 @@ public class GameActivity extends AppCompatActivity {
             });
         }
 
+        // if theyre not on a tutorial, update the new game information
+        // regarding the yellow tiles that remain and the moves they have left.
         else {
             int yellowCount = 0;
 
@@ -613,13 +682,18 @@ public class GameActivity extends AppCompatActivity {
             }
         }
 
+        // update the view.
         updateView();
     }
 
     /**
-     * moves the player down a tile
+     * moves the player down a tile, logic is the same as moveUp(),
+     * just in a different direction.
      */
     public void moveDown() {
+
+        //play sound
+        sp.play(getApplicationContext(), R.raw.move_sound);
 
         //teleporter logic variables
         boolean teleporterFlag = false;
@@ -738,9 +812,14 @@ public class GameActivity extends AppCompatActivity {
     }
 
     /**
-     * moves the player left a tile
+     * moves the player left a tile, logic same as moveUp(),
+     * just in a different direction.
      */
     public void moveLeft() {
+
+        //play sound
+        sp.play(getApplicationContext(), R.raw.move_sound);
+
         //teleporter logic variables
         boolean teleporterFlag = false;
         int teleporterIndex = -1;
@@ -865,9 +944,14 @@ public class GameActivity extends AppCompatActivity {
     }
 
     /**
-     * moves a player right a tile
+     * moves a player right a tile, logic is the same as moveUp(),
+     * just in a different direction.
      */
     public void moveRight() {
+
+        //play sound
+        sp.play(getApplicationContext(), R.raw.move_sound);
+
         boolean teleporterFlag = false;
         int teleporterIndex = -1;
 
@@ -986,7 +1070,18 @@ public class GameActivity extends AppCompatActivity {
         updateView();
     }
 
+    /**
+     * finishes the level and displays the proper finishing
+     * text based on the type of level.
+     */
     public void finishLevel() {
+        // if its a campaign, display the information and move onto
+        // the next level, otherwise end the game activity and go
+        // back to level select.
+
+        // first, play success sound
+        sp.play(getApplicationContext(), R.raw.success_sound);
+
         if (isCampaign) {
             if (currentLevelId == 0) {
                 AlertDialog alertDialog = new AlertDialog.Builder(GameActivity.this).create();
@@ -998,7 +1093,6 @@ public class GameActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
                                 currentLevelId++;
-                                resetGame();
                                 populateLevel(currentLevelId);
                                 resetGame();
                             }
@@ -1007,33 +1101,61 @@ public class GameActivity extends AppCompatActivity {
                 alertDialog.show();
 
             } else if (currentLevelId == 9 && isCampaign) {
+
+                // update the current level progress
+                SharedPreferences savedProgress = getSharedPreferences(PREFS_NAME, 0);
+                SharedPreferences.Editor editor = savedProgress.edit();
+                editor.putInt("currentCampaignLevel", -1);
+
+                int currentBest = savedProgress.getInt("level" + currentLevelId + "best", currentMoves);
+                if (currentMoves <= currentBest) {
+                    editor.putInt("level" + currentLevelId + "best", currentMoves);
+                    currentBest = currentMoves;
+                }
+
+                // Commit the edits!
+                editor.commit();
+
+                // display end of campaign text
                 AlertDialog alertDialog = new AlertDialog.Builder(GameActivity.this).create();
                 alertDialog.setTitle("Level Complete!");
                 alertDialog.setMessage("Congratulations on completing the campaign! Make sure" +
                         " to check the Downloadable Levels if you would like to continue your adventure!\n\n"
-                        + "Moves Taken: " + currentMoves + " moves.\n" + "Moves Record: " + currentMoves + " " +
+                        + "Moves Taken: " + currentMoves + " moves.\n" + "Moves Record: " + currentBest + " " +
                         "moves.");
                 alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
-                                resetGame();
                                 finish();
                             }
                         });
                 alertDialog.setCanceledOnTouchOutside(false);
                 alertDialog.show();
             } else {
+                // its just a normal level, display generic info
+                SharedPreferences savedProgress = getSharedPreferences(PREFS_NAME, 0);
+                SharedPreferences.Editor editor = savedProgress.edit();
+                editor.putInt("currentCampaignLevel", (currentLevelId + 1));
+
+                int currentBest = savedProgress.getInt("level" + currentLevelId+ "best", currentMoves);
+                if (currentMoves <= currentBest) {
+                    editor.putInt("level" + currentLevelId + "best", currentMoves);
+                    currentBest = currentMoves;
+                }
+
+                // Commit the edits!
+                editor.commit();
+
                 AlertDialog alertDialog = new AlertDialog.Builder(GameActivity.this).create();
                 alertDialog.setTitle("Level Complete!");
                 alertDialog.setMessage("Moves Taken: " + currentMoves + " moves.\n" +
-                        "Moves Record: " + currentMoves + " moves.");
+                        "Moves Record: " + currentBest + " moves.");
                 alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
                                 currentLevelId++;
-                                resetGame();
                                 populateLevel(currentLevelId);
                                 resetGame();
                             }
@@ -1042,8 +1164,38 @@ public class GameActivity extends AppCompatActivity {
                 alertDialog.show();
             }
         }
+        else {
+            // came from level select, so just end the level and go back to level select.
+            SharedPreferences savedProgress = getSharedPreferences(PREFS_NAME, 0);
+            SharedPreferences.Editor editor = savedProgress.edit();
+
+            int currentBest = savedProgress.getInt("level" + currentLevelId+ "best", currentMoves);
+            if (currentMoves <= currentBest) {
+                editor.putInt("level" + currentLevelId + "best", currentMoves);
+                currentBest = currentMoves;
+            }
+
+            editor.commit();
+
+            AlertDialog alertDialog = new AlertDialog.Builder(GameActivity.this).create();
+            alertDialog.setTitle("Level Complete!");
+            alertDialog.setMessage("Moves Taken: " + currentMoves + " moves.\n" +
+                    "Moves Record: " + currentBest + " moves.");
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            finish();
+                        }
+                    });
+            alertDialog.setCanceledOnTouchOutside(false);
+            alertDialog.show();
+        }
     }
 
+    /**
+     * if the user uses up all their moves, display failure state to them.
+     */
     public void levelFailed() {
         AlertDialog alertDialog = new AlertDialog.Builder(GameActivity.this).create();
         alertDialog.setTitle("Level Faied!");

@@ -1,5 +1,7 @@
 package mc.group.seven.mcprojectlightshift;
 
+import android.content.SharedPreferences;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -10,6 +12,8 @@ import java.util.ArrayList;
  */
 
 public class LevelList implements Serializable{
+
+    public static final String PREFS_NAME = "MyPrefsFile"; // saved data to pull from
 
     private ArrayList<Level> levels;
 
@@ -37,6 +41,7 @@ public class LevelList implements Serializable{
         String lvl8str = "24 x 30 y 31 b 32 y 37 y 38 g 39 y 44 y 45 b 46 y 31 s";
         String lvl9str = "11 x 12 b 13 u 22 t 28 y 29 y 30 y 37 y 39 t 41 u 46 y 47 b 48 y 54 y 55 y 61 y 62 y 29 s";
 
+        // base level kit
         Level lvl0 = new Level(0, lvl0str, "Level 0 - Learning to Shift", 0, -1, -1);
         Level lvl1 = new Level(1, lvl1str, "Level 1 - Yellowed Out", 0, -1, -1);
         Level lvl2 = new Level(2, lvl2str, "Level 2 - A Touch of Blue", 0, -1, -1);
@@ -48,6 +53,19 @@ public class LevelList implements Serializable{
         Level lvl8 = new Level(8, lvl8str, "Level 8 - Budgeted", 0, -1, 13);
         Level lvl9 = new Level(9, lvl9str, "Level 9 - A Final Test", 0, -1, 25);
 
+        // downloadable level placeholders (no more planned than 10, can always add more)
+        Level dl1 = new Level(10, "", "", 0, -1, -1);
+        Level dl2 = new Level(11, "", "", 0, -1, -1);
+        Level dl3 = new Level(12, "", "", 0, -1, -1);
+        Level dl4 = new Level(13, "", "", 0, -1, -1);
+        Level dl5 = new Level(14, "", "", 0, -1, -1);
+        Level dl6 = new Level(15, "", "", 0, -1, -1);
+        Level dl7 = new Level(16, "", "", 0, -1, -1);
+        Level dl8 = new Level(17, "", "", 0, -1, -1);
+        Level dl9 = new Level(18, "", "", 0, -1, -1);
+        Level dl10 = new Level(19, "", "", 0, -1, -1);
+
+        // base level kit
         addLevel(lvl0);
         addLevel(lvl1);
         addLevel(lvl2);
@@ -58,6 +76,18 @@ public class LevelList implements Serializable{
         addLevel(lvl7);
         addLevel(lvl8);
         addLevel(lvl9);
+
+        // downloadable levels
+        addLevel(dl1);
+        addLevel(dl2);
+        addLevel(dl3);
+        addLevel(dl4);
+        addLevel(dl5);
+        addLevel(dl6);
+        addLevel(dl7);
+        addLevel(dl8);
+        addLevel(dl9);
+        addLevel(dl10);
     }
 
     public ArrayList<Level> getLevels() {
