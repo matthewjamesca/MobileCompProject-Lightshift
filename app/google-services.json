@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "920627880271",
+    "firebase_url": "https://lightshift-a4616.firebaseio.com",
+    "project_id": "lightshift-a4616",
+    "storage_bucket": "lightshift-a4616.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:920627880271:android:ad491d8738530743",
+        "android_client_info": {
+          "package_name": "mc.group.seven.mcprojectlightshift"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "920627880271-noh9cs1g431o7f4tl65edpnkeit5usg7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "mc.group.seven.mcprojectlightshift",
+            "certificate_hash": "1cb3ce72441c9feb5a55af9e1996ce777e56176d"
+          }
+        },
+        {
+          "client_id": "920627880271-dhgpfpuoho4091u0hagal7sml33aa85f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC4X0Lv8sLMtdc9rzRCdTNmFI8ug-wKSMQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "920627880271-dhgpfpuoho4091u0hagal7sml33aa85f.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

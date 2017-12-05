@@ -10,6 +10,9 @@ import android.widget.ImageView;
 
 /**
  * Created by Matthew on 2017-11-29.
+ *
+ * Displays game tiles based off of the game board/key
+ * Refreshes with each move.
  */
 
 public class CustomImageAdapter extends BaseAdapter {

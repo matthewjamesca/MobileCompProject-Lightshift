@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MCProjectLightShift</string>
+    <string name="app_name">MC - LightShift</string>
     <string name="playbtn_name">New Game</string>
     <string name="resetbtn_name">Reset</string>
     <string name="movesnum">Moves: 0</string>

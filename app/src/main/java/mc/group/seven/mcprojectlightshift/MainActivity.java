@@ -50,9 +50,10 @@ public class MainActivity extends AppCompatActivity {
     private void buildLevelList() {
         SharedPreferences savedProgress = getSharedPreferences(PREFS_NAME, 0);
 
-        int tempBestMoves = 0;
+        int tempBestMoves = 0, tempmovesleft = 0;
+        String tempkey, tempname;
 
-        // Get current level progress
+        // Get current level progress from storage and save in (pseudo) global level list
         levelList = new LevelList();
 
         tempBestMoves = savedProgress.getInt("level1best", -1);
@@ -82,35 +83,35 @@ public class MainActivity extends AppCompatActivity {
         tempBestMoves = savedProgress.getInt("level9best", -1);
         levelList.getLevels().get(9).setBestMoves(tempBestMoves);
 
+        // 3 dlc, more can be added if needed
         tempBestMoves = savedProgress.getInt("dl1best", -1);
+        tempname = savedProgress.getString("dl1name", "");
+        tempkey = savedProgress.getString("dl1key", "");
+        tempmovesleft = savedProgress.getInt("dl1ml", -1);
         levelList.getLevels().get(10).setBestMoves(tempBestMoves);
+        levelList.getLevels().get(10).setKey(tempkey);
+        levelList.getLevels().get(10).setName(tempname);
+        levelList.getLevels().get(10).setMovesLeft(tempmovesleft);
+
+        Log.d("LevelKeyMain", "It's: " + tempkey);
 
         tempBestMoves = savedProgress.getInt("dl2best", -1);
+        tempname = savedProgress.getString("dl2name", "");
+        tempkey = savedProgress.getString("dl2key", "");
+        tempmovesleft = savedProgress.getInt("dl2ml", -1);
         levelList.getLevels().get(11).setBestMoves(tempBestMoves);
+        levelList.getLevels().get(11).setKey(tempkey);
+        levelList.getLevels().get(11).setName(tempname);
+        levelList.getLevels().get(11).setMovesLeft(tempmovesleft);
 
         tempBestMoves = savedProgress.getInt("dl3best", -1);
+        tempname = savedProgress.getString("dl3name", "");
+        tempkey = savedProgress.getString("dl3key", "");
+        tempmovesleft = savedProgress.getInt("dl3ml", -1);
         levelList.getLevels().get(12).setBestMoves(tempBestMoves);
-
-        tempBestMoves = savedProgress.getInt("dl4best", -1);
-        levelList.getLevels().get(13).setBestMoves(tempBestMoves);
-
-        tempBestMoves = savedProgress.getInt("dl5best", -1);
-        levelList.getLevels().get(14).setBestMoves(tempBestMoves);
-
-        tempBestMoves = savedProgress.getInt("dl6best", -1);
-        levelList.getLevels().get(15).setBestMoves(tempBestMoves);
-
-        tempBestMoves = savedProgress.getInt("dl7best", -1);
-        levelList.getLevels().get(16).setBestMoves(tempBestMoves);
-
-        tempBestMoves = savedProgress.getInt("dl8best", -1);
-        levelList.getLevels().get(17).setBestMoves(tempBestMoves);
-
-        tempBestMoves = savedProgress.getInt("dl9best", -1);
-        levelList.getLevels().get(18).setBestMoves(tempBestMoves);
-
-        tempBestMoves = savedProgress.getInt("dl10best", -1);
-        levelList.getLevels().get(19).setBestMoves(tempBestMoves);
+        levelList.getLevels().get(12).setKey(tempkey);
+        levelList.getLevels().get(12).setName(tempname);
+        levelList.getLevels().get(12).setMovesLeft(tempmovesleft);
     }
 
     @Override
@@ -162,11 +163,31 @@ public class MainActivity extends AppCompatActivity {
     public void openGame(View view) {
         Intent intent = new Intent(this, GameActivity.class);
         intent.putExtra("openFrom", "c");
+
+        // build levels just incase an update hasnt gone through yet
+        buildLevelList();
+
+        // grab the levels and place them in
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("levels", levelList);
+
+        intent.putExtras(bundle);
+
         startActivity(intent);
     }
 
     public void openDownloadableLevels(View view) {
         Intent intent = new Intent(this, DownloadLevelsActivity.class);
+
+        // build levels just incase an update hasnt gone through yet
+        buildLevelList();
+
+        // grab the levels and place them in
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("levels", levelList);
+
+        intent.putExtras(bundle);
+
         startActivity(intent);
     }
 

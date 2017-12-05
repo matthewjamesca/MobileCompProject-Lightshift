@@ -3,7 +3,6 @@ package mc.group.seven.mcprojectlightshift;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.MediaPlayer;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,6 +13,9 @@ import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+/**
+ * Main game engine
+ */
 public class GameActivity extends AppCompatActivity {
 
     /** FILE STORAGE **/
@@ -43,8 +45,12 @@ public class GameActivity extends AppCompatActivity {
         setContentView(R.layout.activity_game);
 
         // Check if the game was opened from campaign mode or level select mode.
-        Intent intent = getIntent();
+        Intent intent = this.getIntent();
         String openFrom = intent.getExtras().getString("openFrom");
+
+        // grab level list object from intent
+        Bundle bundle = intent.getExtras();
+        levelList = (LevelList) bundle.getSerializable("levels");
 
         // get current level status of user from storage.
         if (openFrom.equals("c")) {
@@ -71,9 +77,6 @@ public class GameActivity extends AppCompatActivity {
         tv_feedback = (TextView) findViewById(R.id.tv_feedback);
         btn_reset = (Button) findViewById(R.id.btn_reset);
         btn_fb = (Button) findViewById(R.id.btn_fb);
-
-        //load levels and determine current level
-        levelList = new LevelList();
 
         gv = (GridView) this.findViewById(R.id.mygrid);
 
@@ -136,6 +139,8 @@ public class GameActivity extends AppCompatActivity {
         remainingMoves = levelList.getLevels().get(levelIndex).getMovesLeft();
 
         String levelKey = levelList.getLevels().get(levelIndex).getKey();
+
+
 
         String[] levelComponents = levelKey.split("\\s+");
 
@@ -1169,10 +1174,22 @@ public class GameActivity extends AppCompatActivity {
             SharedPreferences savedProgress = getSharedPreferences(PREFS_NAME, 0);
             SharedPreferences.Editor editor = savedProgress.edit();
 
-            int currentBest = savedProgress.getInt("level" + currentLevelId+ "best", currentMoves);
-            if (currentMoves <= currentBest) {
-                editor.putInt("level" + currentLevelId + "best", currentMoves);
-                currentBest = currentMoves;
+            int currentBest;
+
+            if (currentLevelId < 10) {
+                currentBest = savedProgress.getInt("level" + currentLevelId + "best", currentMoves);
+                if (currentMoves <= currentBest) {
+                    editor.putInt("level" + currentLevelId + "best", currentMoves);
+                    currentBest = currentMoves;
+                }
+            }
+            // dlc level, needs to be saved in a different way than campaign
+            else {
+                currentBest = savedProgress.getInt("dl" + (currentLevelId - 9) + "best", currentMoves);
+                if (currentMoves <= currentBest) {
+                    editor.putInt("dl" + (currentLevelId - 9) + "best", currentMoves);
+                    currentBest = currentMoves;
+                }
             }
 
             editor.commit();

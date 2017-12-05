@@ -1,7 +1,5 @@
 package mc.group.seven.mcprojectlightshift;
 
-import android.content.SharedPreferences;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -57,13 +55,6 @@ public class LevelList implements Serializable{
         Level dl1 = new Level(10, "", "", 0, -1, -1);
         Level dl2 = new Level(11, "", "", 0, -1, -1);
         Level dl3 = new Level(12, "", "", 0, -1, -1);
-        Level dl4 = new Level(13, "", "", 0, -1, -1);
-        Level dl5 = new Level(14, "", "", 0, -1, -1);
-        Level dl6 = new Level(15, "", "", 0, -1, -1);
-        Level dl7 = new Level(16, "", "", 0, -1, -1);
-        Level dl8 = new Level(17, "", "", 0, -1, -1);
-        Level dl9 = new Level(18, "", "", 0, -1, -1);
-        Level dl10 = new Level(19, "", "", 0, -1, -1);
 
         // base level kit
         addLevel(lvl0);
@@ -77,17 +68,10 @@ public class LevelList implements Serializable{
         addLevel(lvl8);
         addLevel(lvl9);
 
-        // downloadable levels
+        // downloadable level placeholders
         addLevel(dl1);
         addLevel(dl2);
         addLevel(dl3);
-        addLevel(dl4);
-        addLevel(dl5);
-        addLevel(dl6);
-        addLevel(dl7);
-        addLevel(dl8);
-        addLevel(dl9);
-        addLevel(dl10);
     }
 
     public ArrayList<Level> getLevels() {

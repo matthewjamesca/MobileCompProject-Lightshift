@@ -3,6 +3,9 @@ package mc.group.seven.mcprojectlightshift;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+/**
+ * Activity that displays our information
+ */
 public class ContactUsActivity extends AppCompatActivity {
 
     @Override

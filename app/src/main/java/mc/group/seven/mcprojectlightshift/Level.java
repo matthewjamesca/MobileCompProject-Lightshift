@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 /**
  * Created by Matthew on 2017-11-17.
+ *
+ * Level container object.
  */
 
 public class Level implements Serializable{
@@ -42,5 +44,17 @@ public class Level implements Serializable{
 
     public void setBestMoves(int bestMoves) {
         this.bestMoves = bestMoves;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setMovesLeft(int movesLeft) {
+        this.movesLeft = movesLeft;
     }
 }
